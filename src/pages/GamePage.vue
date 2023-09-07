@@ -1,6 +1,6 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <div>Yo this is the INDEX page where you can login</div>
+    <div>Yo this is the GAME page</div>
   </q-page>
 </template>
 
