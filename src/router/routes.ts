@@ -10,13 +10,13 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/join',
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/JoinPage.vue') }],
+    children: [{ path: '', component: () => import('pages/JoinPage.vue'), props: true }],
   },
 
   {
     path: '/game', 
     component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/GamePage.vue') }],
+    children: [{ path: '', component: () => import('pages/GamePage.vue'), props: true }],
   },
 
   // Always leave this as last one,
