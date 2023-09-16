@@ -1,7 +1,7 @@
 export const getApiUrl = (): string => {
   return window.location.href.includes('http://localhost')
     ? 'http://localhost:4567'
-    : 'https://gomokumoku.vercel.app';
+    : 'https://gomoku-api.onrender.com';
 };
 
 export const drawHorizLine = (
