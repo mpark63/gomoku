@@ -1,5 +1,9 @@
 export const getApiUrl = (): string => {
-  return 'http://localhost:4567';
+  if (process.env.STAGE === 'production') {
+    return 'https://gomokumoku.vercel.app';
+  } else {
+    return 'http://localhost:4567';
+  }
 };
 
 export const drawHorizLine = (
