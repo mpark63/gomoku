@@ -2,13 +2,13 @@
   <q-page class="row flex-center no-wrap bg-blue-grey-3">
     <div class="q-pa-md q-gutter-sm">
       <q-dialog
-        v-model="gameOver"
+        v-model="game.gameOver"
         no-esc-dismiss
         no-backdrop-dismiss
         no-route-dismiss
       >
         <q-banner rounded class="bg-purple-8 text-white">
-          Game over! {{ currentTurn }} wins!
+          Game over! {{ game.currentTurn }} wins!
           <template v-slot:action>
             <q-btn
               flat
@@ -21,7 +21,21 @@
       </q-dialog>
     </div>
     <div class="row">
-      <q-icon :name="blackIcon" size="300px" />
+      <q-card flat class="bg-blue-grey-3">
+        <q-card-section>
+          <q-icon :name="blackIcon" size="300px" :label="'hello'" />
+        </q-card-section>
+        <q-separator inset />
+        <q-card-section>
+          <div class="text-h6 text-center">{{ game.blackUsername }}</div>
+          <div
+            class="text-h6 text-center"
+            v-if="game.blackUsername == username"
+          >
+            (you)
+          </div>
+        </q-card-section>
+      </q-card>
     </div>
     <canvas
       ref="myCanvas"
@@ -31,7 +45,21 @@
       @click="placePiece"
     ></canvas>
     <div>
-      <q-icon :name="whiteIcon" size="300px" color="white" />
+      <q-card flat class="bg-blue-grey-3">
+        <q-card-section>
+          <q-icon :name="whiteIcon" size="300px" color="white" />
+        </q-card-section>
+        <q-separator inset />
+        <q-card-section>
+          <div class="text-h6 text-center">{{ game.whiteUsername }}</div>
+          <div
+            class="text-h6 text-center"
+            v-if="game.whiteUsername == username"
+          >
+            (you)
+          </div>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
@@ -47,21 +75,28 @@ import {
 } from 'src/utils';
 
 export default {
-  props: ['username', 'gameCode'],
+  props: ['username', 'gameCode', 'socketService'],
   mounted() {
     if (!this.gameCode) {
       return this.$router.push('/join');
     }
+    // join socket
+    this.socketService.socket.emit('join game', this.username, this.gameCode);
+    // update
+    this.socketService.socket.on('update', (game: any) => {
+      console.log('updating');
+      console.log(game);
+      this.game = game;
+      this.drawBoard();
+    });
+
     // get game
     axios
       .get(`${getApiUrl()}/games/${this.gameCode}?username=${this.username}`)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .then((res: any) => {
         // restore game state
-        const game = res.data.data;
-        this.currentTurn = game.currentTurn;
-        this.positions = game.positions;
-        this.gameOver = game.gameOver;
+        this.game = res.data.data;
 
         // draw board
         var canvas = this.$refs.myCanvas as HTMLCanvasElement;
@@ -80,19 +115,24 @@ export default {
     return {
       canvas: null as HTMLCanvasElement | null,
       ctx: null as CanvasRenderingContext2D | null,
-      currentTurn: 'black',
       mouseX: 0,
       mouseY: 0,
-      positions: [] as string[][],
-      gameOver: false,
+      game: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentTurn: 'black',
+        positions: [] as string[][],
+        gameOver: false,
+        blackUsername: '',
+        whiteUsername: '',
+      },
     };
   },
   computed: {
     blackIcon(): string {
-      return this.currentTurn === 'black' ? 'emoji_people' : 'boy';
+      return this.game.currentTurn === 'black' ? 'emoji_people' : 'boy';
     },
     whiteIcon(): string {
-      return this.currentTurn === 'white' ? 'emoji_people' : 'boy';
+      return this.game.currentTurn === 'white' ? 'emoji_people' : 'boy';
     },
   },
   methods: {
@@ -116,8 +156,8 @@ export default {
         // draw pieces
         for (let i = 0; i < 19; i++) {
           for (let j = 0; j < 19; j++) {
-            if (this.positions[i][j] !== '') {
-              drawPiece(this.ctx, i, j, this.positions[i][j]);
+            if (this.game.positions[i][j] !== '') {
+              drawPiece(this.ctx, i, j, this.game.positions[i][j]);
             }
           }
         }
@@ -136,13 +176,15 @@ export default {
           ? Math.floor(this.mouseY / 30)
           : Math.ceil(this.mouseY / 30);
 
+      tempX--;
+      tempY--;
       // client check that move is valid
       if (
         tempY < 0 ||
         tempX < 0 ||
         tempX > 18 ||
         tempY > 18 ||
-        this.positions[tempX][tempY] !== ''
+        this.game.positions[tempX][tempY] !== ''
       ) {
         return alert('Illegal move!');
       }
@@ -153,15 +195,6 @@ export default {
           x: tempX,
           y: tempY,
         });
-        // draw piece
-        drawPiece(this.ctx, tempX, tempY, this.currentTurn);
-        // update state
-        const game = res.data.data;
-        this.positions = game.positions;
-        this.gameOver = game.gameOver;
-        if (!this.gameOver) {
-          this.currentTurn = game.currentTurn;
-        }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.log(err);

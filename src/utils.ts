@@ -41,9 +41,8 @@ export const drawPiece = (
   color: string
 ) => {
   ctx.beginPath();
-  ctx.arc(x * 30, y * 30, 14, 0, 2 * Math.PI);
+  ctx.arc(x * 30 + 30, y * 30 + 30, 14, 0, 2 * Math.PI);
   ctx.fillStyle = color;
   ctx.fill();
   ctx.closePath();
 };
-

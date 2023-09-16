@@ -1,5 +1,10 @@
 <template>
   <q-page class="row items-center justify-evenly">
+    <q-dialog v-model="loginFailed">
+      <q-banner rounded class="bg-purple-8 text-white">
+        Invalid username or password
+      </q-banner>
+    </q-dialog>
     <q-card class="q-pa-xl bg-blue-2 flex-center">
       <h2>Login to play Gomoku</h2>
       <div class="col-4 q-gutter-y-md">
@@ -20,6 +25,7 @@ export default {
     return {
       username: '',
       password: '',
+      loginFailed: false,
     };
   },
   methods: {
@@ -37,7 +43,7 @@ export default {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .catch((err: any) => {
           console.log(err.response.data.message);
-          // show err
+          this.loginFailed = true;
         });
     },
   },

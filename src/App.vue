@@ -1,11 +1,25 @@
 <template>
-  <router-view />
+  <router-view :socketService="socketService" />
 </template>
 
-<script lang="ts">
-import { defineComponent } from 'vue';
+<script>
+import SocketioService from './socketio.service.js';
 
-export default defineComponent({
-  name: 'App'
-});
+export default {
+  name: 'App',
+  data() {
+    return {
+      socketService: null,
+    };
+  },
+  created() {
+    this.socketService = new SocketioService();
+    this.socketService.setupSocketConnection();
+  },
+  provide() {
+    return {
+      socketService: this.socketService,
+    };
+  },
+};
 </script>

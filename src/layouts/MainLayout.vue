@@ -31,6 +31,7 @@
       <router-view
         :username="username"
         :gameCode="gameCode"
+        :socketService="socketService"
         @update-user="updateUser"
         @update-code="updateGameCode"
       />
@@ -40,6 +41,7 @@
 
 <script lang="ts">
 export default {
+  props: ['socketService'],
   data() {
     return {
       username: '',
