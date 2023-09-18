@@ -15,7 +15,9 @@
           <q-icon name="circle" color="black" />
           <q-icon name="circle" />
         </div>
-        <div class="text-h6 q-mx-xl">{{ gameCode }}</div>
+        <div class="text-h4 text-center q-mx-xl q-px-xl">
+          {{ gameCode }}
+        </div>
         <div
           class="row items-center absolute-right on-right q-gutter-md q-mr-md"
         >
@@ -51,12 +53,12 @@ export default {
   methods: {
     navToJoin() {
       this.gameCode = '';
-      this.$router.push('join/');
+      this.$router.replace('join/');
     },
     logout() {
       this.username = '';
       this.gameCode = '';
-      this.$router.push('/');
+      this.$router.replace('/');
     },
     updateUser(username: string) {
       this.username = username;

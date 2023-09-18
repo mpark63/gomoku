@@ -9,7 +9,13 @@
       <h2>Login to play Gomoku</h2>
       <div class="col-4 q-gutter-y-md">
         <q-input outlined v-model="username" label="Username" stack-label />
-        <q-input outlined v-model="password" label="Password" stack-label />
+        <q-input
+          outlined
+          type="password"
+          v-model="password"
+          label="Password"
+          stack-label
+        />
         <q-btn label="signup / login" @click="login" color="secondary" />
       </div>
     </q-card>

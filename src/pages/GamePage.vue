@@ -51,7 +51,13 @@
         </q-card-section>
         <q-separator inset />
         <q-card-section>
-          <div class="text-h6 text-center">{{ game.whiteUsername }}</div>
+          <div v-if="game.whiteUsername" class="text-h6 text-center">
+            {{ game.whiteUsername }}
+          </div>
+          <div v-else class="text-h6 text-center">
+            <div>Invite player with code:</div>
+            {{ gameCode }}
+          </div>
           <div
             class="text-h6 text-center"
             v-if="game.whiteUsername == username"
@@ -66,13 +72,7 @@
 
 <script lang="ts">
 import axios from 'axios';
-import {
-  getApiUrl,
-  drawDot,
-  drawHorizLine,
-  drawPiece,
-  drawVerticLine,
-} from 'src/utils';
+import { getApiUrl, drawBoard } from 'src/utils';
 
 export default {
   props: ['username', 'gameCode', 'socketService'],
@@ -85,9 +85,10 @@ export default {
     // update
     this.socketService.socket.on('update', (game: any) => {
       console.log('updating');
-      console.log(game);
       this.game = game;
-      this.drawBoard();
+      if (this.canvas && this.ctx) {
+        drawBoard(this.canvas, this.ctx, this.game.positions);
+      }
     });
 
     // get game
@@ -103,12 +104,13 @@ export default {
         var ctx = canvas.getContext('2d');
         this.canvas = canvas;
         this.ctx = ctx;
-        this.drawBoard();
+        if (this.canvas && this.ctx) {
+          drawBoard(this.canvas, this.ctx, this.game.positions);
+        }
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .catch((err: any) => {
-        console.log(err);
-        alert('Something went wrong!');
+        alert(err.response.data.message);
       });
   },
   data() {
@@ -136,33 +138,6 @@ export default {
     },
   },
   methods: {
-    drawBoard() {
-      if (this.ctx) {
-        // draw lines for board
-        for (let i = 30; i <= 570; i += 30) {
-          this.ctx.beginPath();
-          drawHorizLine(this.ctx, i);
-          drawVerticLine(this.ctx, i);
-          this.ctx.closePath();
-        }
-
-        // draw reference dots
-        for (let i = 4; i <= 16; i += 6) {
-          for (let j = 4; j <= 16; j += 6) {
-            drawDot(this.ctx, i, j);
-          }
-        }
-
-        // draw pieces
-        for (let i = 0; i < 19; i++) {
-          for (let j = 0; j < 19; j++) {
-            if (this.game.positions[i][j] !== '') {
-              drawPiece(this.ctx, i, j, this.game.positions[i][j]);
-            }
-          }
-        }
-      }
-    },
     async placePiece() {
       if (!this.ctx) return;
 
@@ -190,15 +165,14 @@ export default {
       }
 
       try {
-        const res = await axios.patch(`${getApiUrl()}/games/${this.gameCode}`, {
+        await axios.patch(`${getApiUrl()}/games/${this.gameCode}`, {
           username: this.username,
           x: tempX,
           y: tempY,
         });
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
-        console.log(err);
-        alert('Something went wrong!');
+        alert(err.response.data.message);
       }
     },
     getMousePos(e: MouseEvent) {
