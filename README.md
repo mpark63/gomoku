@@ -1,6 +1,7 @@
 # Go moku moku! (gomoku)
 
 moku moku
+https://gomokumoku.vercel.app/#/
 
 ## Install the dependencies
 
